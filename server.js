@@ -18,19 +18,6 @@ app.use(express.json());
 const writeFileAsync = util.promisify(fs.writeFile);
 const readFileAsync = util.promisify(fs.readFile);
 
-myNotes = [
-  {
-    "title": "asdsa",
-    "text": "dadadas",
-    "id": 6
-  },
-  {
-    "title": "asdas",
-    "text": "dasdasdad",
-    "id": 7
-  }
-];
-
 // Routes
 // =============================================================
 app.use(express.static(path.resolve('./public')));
@@ -49,12 +36,32 @@ app.get("/api/notes", async function (req, res) {
 });
 
 app.post("/api/notes", async function (req, res) {
-  console.log(req.body)
   const db = JSON.parse(await readFileAsync(__dirname + "/db/db.json"));
-  req.body.id = db.length ? db[db.length - 1].id +1 : 1;
+  req.body.id = db.length ? db[db.length - 1].id + 1 : 1;
   db.push(req.body);
   await writeFileAsync(__dirname + "/db/db.json", JSON.stringify(db));
-  console.log(db)
+  return res.json(db);
+});
+
+app.delete("/api/notes/:id", async function (req, res) {
+  const db = JSON.parse(await readFileAsync(__dirname + "/db/db.json"));
+//   db.forEach(function(key,value){
+//     console.log(key.id);
+//     console.log(value);
+//  })
+  let myFlag = true;
+  let i = 0;
+  while (myFlag) {
+    switch (db[i].id) {
+      case parseInt(req.params.id) :
+        db.splice(i, 1);
+        myFlag = !myFlag;
+        break;
+      default:
+        i++;
+    }
+  }
+  await writeFileAsync(__dirname + "/db/db.json", JSON.stringify(db));
   return res.json(db);
 });
 
