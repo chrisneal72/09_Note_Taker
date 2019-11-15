@@ -1,0 +1,68 @@
+// Dependencies
+// =============================================================
+const express = require("express");
+const fs = require("fs");
+const util = require("util");
+const path = require("path");
+
+// Sets up the Express App
+// =============================================================
+var app = express();
+var PORT = process.env.PORT || 3000;
+
+// Sets up the Express app to handle data parsing
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+
+// Promisify Modules
+const writeFileAsync = util.promisify(fs.writeFile);
+const readFileAsync = util.promisify(fs.readFile);
+
+myNotes = [
+  {
+    "title": "asdsa",
+    "text": "dadadas",
+    "id": 6
+  },
+  {
+    "title": "asdas",
+    "text": "dasdasdad",
+    "id": 7
+  }
+];
+
+// Routes
+// =============================================================
+app.use(express.static(path.resolve('./public')));
+// Basic route that sends the user first to the AJAX Page
+app.get("/", function (req, res) {
+  res.sendFile(path.join(__dirname, "/public/index.html"));
+});
+
+app.get("/notes", function (req, res) {
+  res.sendFile(path.join(__dirname, "/public/notes.html"));
+});
+
+app.get("/api/notes", async function (req, res) {
+  const db = JSON.parse(await readFileAsync(__dirname + "/db/db.json"));
+  return res.json(db);
+});
+
+app.post("/api/notes", async function (req, res) {
+  console.log(req.body)
+  const db = JSON.parse(await readFileAsync(__dirname + "/db/db.json"));
+  req.body.id = db.length ? db[db.length - 1].id +1 : 1;
+  db.push(req.body);
+  await writeFileAsync(__dirname + "/db/db.json", JSON.stringify(db));
+  console.log(db)
+  return res.json(db);
+});
+
+app.get("*", function (req, res) {
+  res.sendFile(path.join(__dirname, "/public/index.html"));
+});
+// Starts the server to begin listening
+// =============================================================
+app.listen(PORT, function () {
+  console.log("App listening on PORT " + PORT);
+});
