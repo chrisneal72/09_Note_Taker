@@ -45,10 +45,6 @@ app.post("/api/notes", async function (req, res) {
 
 app.delete("/api/notes/:id", async function (req, res) {
   const db = JSON.parse(await readFileAsync(__dirname + "/db/db.json"));
-//   db.forEach(function(key,value){
-//     console.log(key.id);
-//     console.log(value);
-//  })
   let myFlag = true;
   let i = 0;
   while (myFlag) {
